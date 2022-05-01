@@ -35,6 +35,7 @@ algo_c_map = {
     'ILP Waypoints': "mediumvioletred",
     'JointHeur': "seagreen",
     'ILP Joint': "darkgreen",
+    'Algo': "red",
 }
 
 # maps display name to internal name of topologies
@@ -93,14 +94,15 @@ top_n_map = {
 }
 
 
-def add_vertical_algorithm_labels(ax):
+def add_vertical_algorithm_labels(ax, val_list=None):
     """ Computes the position of the vertical algorithm labels and adds them to the plot """
     ymin, ymax = ax.get_ylim()
     lines = ax.get_lines()
     boxes = [c for c in ax.get_children() if type(c).__name__ == 'PathPatch']
     lines_per_box = int(len(lines) / len(boxes))
 
-    val_list = list(algo_c_map.keys())
+    if val_list is None:
+        val_list = list(algo_c_map.keys())
     off_set = (ymax - ymin) * 0.025
     for i, median in enumerate(lines[3:len(lines):lines_per_box]):
         x, y = (data.mean() for data in median.get_data())
@@ -138,7 +140,10 @@ def create_box_plot(df_plot, x, y, hue, file_name, x_label="", y_label="", fig_s
     for y_line in x_grid_lines:
         y_line.set_color('white')
 
-    add_vertical_algorithm_labels(box_plot.axes)
+    # Doing whatever it takes to get the list of unique algorithm names
+    plotted_algs = df_plot.groupby(hue).filter(lambda x: len(x) > 2).drop_duplicates(subset=hue)[hue].tolist()
+
+    add_vertical_algorithm_labels(box_plot.axes, val_list=plotted_algs)
     plt.xticks(rotation=0)
     plt.savefig(file_name.replace(" ", ""), bbox_inches="tight", format='pdf')
     plt.close()
@@ -222,6 +227,7 @@ def prepare_data_and_plot(df, title, plot_type):
     df["algorithm_complete"] = df["algorithm_complete"].str.replace("SegmentIlp", "ILP")
     df["algorithm_complete"] = df["algorithm_complete"].str.replace("DemandFirstWaypoints", "GreedyWaypoints")
     df["algorithm_complete"] = df["algorithm_complete"].str.replace("SequentialCombination", "JointHeur")
+    df["algorithm_complete"] = df["algorithm_complete"].str.replace("SomeAlgo", "Algo")
 
     # beautify topology names
     df["topology_name"] = df["topology_name"].apply(lambda x: top_n_map[x])

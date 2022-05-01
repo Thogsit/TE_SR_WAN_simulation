@@ -7,6 +7,7 @@ from algorithm.segment_routing.inverse_capacity import InverseCapacity
 from algorithm.segment_routing.segment_ilp import SegmentILP
 from algorithm.segment_routing.sequential_combination import SequentialCombination
 from algorithm.segment_routing.uniform_weights import UniformWeights
+from algorithm.segment_routing.some_algo import SomeAlgo
 
 
 def get_algorithm(algorithm_name: str, nodes: list, links: list, demands: list, weights=None, waypoints=None,
@@ -26,6 +27,8 @@ def get_algorithm(algorithm_name: str, nodes: list, links: list, demands: list, 
                                           first_algorithm="heur_ospf_weights", second_algorithm="demand_first_waypoints")
     elif algorithm_name == "uniform_weights":
         algorithm = UniformWeights(nodes, links, demands, weights, waypoints, seed=seed)
+    elif algorithm_name == "some_algo":
+        algorithm = SomeAlgo(nodes, links, demands, weights, waypoints, seed=seed)
     else:
         err_msg = f"algorithm not found: {algorithm_name}"
         raise Exception(err_msg)
